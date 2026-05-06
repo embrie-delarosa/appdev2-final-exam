@@ -8,7 +8,7 @@ export default defineSchema({
     userId: v.id("users")
   }),
   users: defineTable({
-    fullName: v.string(),
+    fullName: v.string(),// New field for user's full name
     email: v.string(),
     password: v.string(),
   }).index("by_email", ["email"])
