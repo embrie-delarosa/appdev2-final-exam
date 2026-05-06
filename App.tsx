@@ -1,34 +1,32 @@
 import { ConvexProvider, ConvexReactClient } from "convex/react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TodoScreen from "./screens/TodoScreen";
 import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
-import { useState } from "react";
-
-import { Id } from "./convex/_generated/dataModel";
+import { RootStackParamList } from "./navigation/types";
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
 
-export default function App() {
-  const [userId, setUserId] = useState<Id<"users"> | null>(null)
-  const [authScreen, setAuthScreen] = useState<"login" | "signup">("login")
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
+export default function App() {
   return (
     <ConvexProvider client={convex}>
-      {userId ? (
-        <TodoScreen userId={userId} />
-      ) : authScreen === "signup" ? (
-        <SignupScreen
-          onSignup={(id: Id<"users">) => setUserId(id)}
-          onGoToLogin={() => setAuthScreen("login")}
-        />
-      ) : (
-        <LoginScreen
-          onLogin={(id: Id<"users">) => setUserId(id)}
-          onGoToSignup={() => setAuthScreen("signup")}
-        />
-      )}
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+          <Stack.Screen name="Todo" component={TodoScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     </ConvexProvider>
   );
 }

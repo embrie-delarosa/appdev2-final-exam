@@ -9,21 +9,22 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
+import { RootStackParamList } from "../navigation/types";
 
-interface SignupProps {
-  onSignup: (id: Id<"users">) => void;
-  onGoToLogin: () => void;
-}
+type SignupNavigation = NativeStackNavigationProp<RootStackParamList, "Signup">;
 
-export default function SignupScreen({ onSignup, onGoToLogin }: SignupProps) {
+export default function SignupScreen() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigation = useNavigation<SignupNavigation>();
   const registerMutation = useMutation(api.users.register);
 
   const handleSignup = async () => {
@@ -41,7 +42,10 @@ export default function SignupScreen({ onSignup, onGoToLogin }: SignupProps) {
 
       if (typeof result === "string") {
         const userId = result as Id<"users">;
-        onSignup(userId);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Todo", params: { userId } }],
+        });
         setFullName("");
         setEmail("");
         setPassword("");
@@ -119,7 +123,7 @@ export default function SignupScreen({ onSignup, onGoToLogin }: SignupProps) {
 
         <View style={styles.footer}>
           <Text>Already have an account? </Text>
-          <TouchableOpacity onPress={onGoToLogin}>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={styles.linkText}>Log In</Text>
           </TouchableOpacity>
         </View>

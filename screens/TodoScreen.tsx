@@ -1,5 +1,7 @@
 import { useState } from "react";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
     Alert,
     KeyboardAvoidingView,
@@ -15,10 +17,18 @@ import {
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
+import { RootStackParamList } from "../navigation/types";
 
-const TodoScreen = ({ userId }: {userId: Id<"users">}) => {
+type TodoRoute = RouteProp<RootStackParamList, "Todo">;
+type TodoNavigation = NativeStackNavigationProp<RootStackParamList, "Todo">;
+
+const TodoScreen = () => {
     const [task, setTask] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+
+    const route = useRoute<TodoRoute>();
+    const navigation = useNavigation<TodoNavigation>();
+    const { userId } = route.params;
 
     const todoList = useQuery(api.todos.get, { userId });
     const addTodo = useMutation(api.todos.add);
@@ -55,11 +65,23 @@ const TodoScreen = ({ userId }: {userId: Id<"users">}) => {
         ]);
     };
 
+    const handleLogout = () => {
+        navigation.reset({
+            index: 0,
+            routes: [{ name: "Login" }],
+        });
+    };
+
     return (
         <View style={styles.container}>
             {/* 1. Header Section (Purple) */}
             <View style={styles.header}>
-                <Text style={styles.title}>My Tasks</Text>
+                <View style={styles.titleRow}>
+                    <Text style={styles.title}>My Tasks</Text>
+                    <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                        <Ionicons name="log-out-outline" size={26} color="#FFFFFF" />
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.searchContainer}>
                     <Ionicons name="search-outline" size={20} color="#666" />
                     <TextInput
@@ -131,7 +153,18 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontWeight: "bold",
         color: "#FFFFFF",
+    },
+    titleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
         marginBottom: 20,
+    },
+    logoutButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
     },
     searchContainer: {
         flexDirection: 'row',

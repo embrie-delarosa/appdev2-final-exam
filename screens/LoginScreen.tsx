@@ -9,20 +9,20 @@ import {
     Alert,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Id } from "../convex/_generated/dataModel";
+import { RootStackParamList } from "../navigation/types";
 
-interface LoginProps {
-    onLogin: (id: Id<"users">) => void
-    onGoToSignup: () => void
-}
+type LoginNavigation = NativeStackNavigationProp<RootStackParamList, "Login">;
 
-const LoginScreen = ({ onLogin, onGoToSignup } : LoginProps) => {
+const LoginScreen = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
+    const navigation = useNavigation<LoginNavigation>();
     const loginMutation = useMutation(api.users.login)
 
     const handleLogin = async () => {
@@ -39,7 +39,10 @@ const LoginScreen = ({ onLogin, onGoToSignup } : LoginProps) => {
 
             if (result.success && result.userId) {
 
-                onLogin(result.userId)
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: "Todo", params: { userId: result.userId } }],
+                });
 
                 setEmail('')
                 setPassword('')
@@ -115,7 +118,7 @@ const LoginScreen = ({ onLogin, onGoToSignup } : LoginProps) => {
 
                 <View style={styles.footer}>
                     <Text>Don't have an account? </Text>
-                    <TouchableOpacity onPress={onGoToSignup}>
+                    <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
                         <Text style={styles.linkText}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
