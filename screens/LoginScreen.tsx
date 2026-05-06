@@ -16,9 +16,10 @@ import { Id } from "../convex/_generated/dataModel";
 
 interface LoginProps {
     onLogin: (id: Id<"users">) => void
+    onGoToSignup: () => void
 }
 
-const LoginScreen = ({ onLogin } : LoginProps) => {
+const LoginScreen = ({ onLogin, onGoToSignup } : LoginProps) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
 
@@ -26,12 +27,13 @@ const LoginScreen = ({ onLogin } : LoginProps) => {
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert("Error", "Please enter username and password!")
+            Alert.alert("Error", "Please enter email address and password!")
+            return;
         }
 
         try {
             const result = await loginMutation({
-                username: email,
+                email,
                 password
             })
 
@@ -70,6 +72,8 @@ const LoginScreen = ({ onLogin } : LoginProps) => {
                     placeholder="john@gmail.com" 
                     value={email}
                     onChangeText={setEmail}
+                    autoCapitalize="none"
+                    keyboardType="email-address"
                 />
 
 
@@ -111,7 +115,7 @@ const LoginScreen = ({ onLogin } : LoginProps) => {
 
                 <View style={styles.footer}>
                     <Text>Don't have an account? </Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={onGoToSignup}>
                         <Text style={styles.linkText}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>

@@ -2,14 +2,29 @@ import { mutation } from "./_generated/server"
 import { v } from "convex/values"
 import bcrypt from "bcryptjs"
 
+const initialTasks = [
+    "Buy groceries",
+    "Finish React Native tutorial",
+    "Clean the kitchen",
+    "Call mom",
+    "Schedule dentist appointment",
+    "Fix bug in todo app",
+    "Read 10 pages of a book",
+    "Go for a 20-minute run",
+    "Organize desk",
+    "Meditate for 5 minutes"
+]
+
 export const login = mutation({
     args: {
-        username: v.string(),
+        email: v.string(),
         password: v.string()
     },
     handler: async (ctx, args) => {
+        const email = args.email.trim().toLowerCase()
+
         const user = await ctx.db.query("users")
-            .filter((q) => q.eq(q.field("username"), args.username))
+            .withIndex("by_email", (q) => q.eq("email", email))
             .unique();
 
         if (!user) {
@@ -31,12 +46,16 @@ export const login = mutation({
 
 export const register = mutation({
     args: {
-        username: v.string(),
+        fullName: v.string(),
+        email: v.string(),
         password: v.string()
     },
     handler: async (ctx, args) => {
+        const fullName = args.fullName.trim()
+        const email = args.email.trim().toLowerCase()
+
         const user = await ctx.db.query("users")
-            .filter((q) => q.eq(q.field("username"), args.username))
+            .withIndex("by_email", (q) => q.eq("email", email))
             .unique();
 
         if (user) {
@@ -45,10 +64,19 @@ export const register = mutation({
 
         const hashedPassword = bcrypt.hashSync(args.password, 10);
 
-        const userId = ctx.db.insert("users", {
-            username: args.username,
+        const userId = await ctx.db.insert("users", {
+            fullName,
+            email,
             password: hashedPassword
         });
+
+        for (const taskText of initialTasks) {
+            await ctx.db.insert("todos", {
+                text: taskText,
+                isCompleted: Math.random() > 0.7,
+                userId
+            });
+        }
 
         return userId;
     }
