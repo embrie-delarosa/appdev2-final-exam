@@ -46,7 +46,7 @@ export const login = mutation({
 
 export const register = mutation({
     args: {
-        fullName: v.string(),
+        fullName: v.string(),// New field for user's full name
         email: v.string(),
         password: v.string()
     },
